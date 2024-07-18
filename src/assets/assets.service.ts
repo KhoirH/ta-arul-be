@@ -10,6 +10,14 @@ export class AssetsService {
     return this.prisma.assets.findMany();
   }
 
+  async getById(id: number) {
+    return this.prisma.assets.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
   async createAsset(data: Prisma.AssetsCreateInput): Promise<Assets> {
     return this.prisma.assets.create({
       data,
@@ -18,12 +26,22 @@ export class AssetsService {
 
   async updateAsset(
     id: number,
-    data: Prisma.AssetsCreateInput,
+    {
+      version,
+      ...data
+    }: Omit<Prisma.AssetsUpdateInput, 'version'> &
+      Pick<Prisma.AssetsCreateInput, 'version'>,
   ): Promise<Assets> {
     return this.prisma.assets.update({
-      data,
+      data: {
+        ...data,
+        version: {
+          increment: 1,
+        },
+      },
       where: {
         id,
+        version,
       },
     });
   }

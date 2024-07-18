@@ -19,6 +19,8 @@ model Assets {
   asset_number  Int
   serial_number  String @db.VarChar(255)
   asset_year  String? @db.VarChar(255)
+  avability  Boolean @default(true)
+  version  Int @default(1)
 }
 
 model Users {
@@ -33,7 +35,6 @@ model History {
   id    Int     @id @default(autoincrement())
   id_asset Int 
   id_user  Int 
-  avability  Boolean 
   condition  Boolean 
   status_unit String @db.VarChar(100)
   section String @db.VarChar(100)

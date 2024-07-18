@@ -7,6 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,15 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @ApiOperation({ summary: 'Create cat' })
+  @ApiBody({
+    schema: {
+      default: {
+        password: 'admin',
+        username: 'admin',
+      },
+    },
+  })
   signIn(@Body() signInDto: Record<string, any>) {
     if (!signInDto.username || !signInDto.password) {
       throw new BadRequestException();

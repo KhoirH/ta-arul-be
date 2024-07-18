@@ -7,7 +7,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @UseGuards(AuthGuard)
-  @Get()
+  @Get('search')
   async findUsers(@Query() queryString: { name?: string; no_reg?: string }) {
     const data = await this.usersService.searchUsers(
       queryString.name,
