@@ -8,7 +8,7 @@ export class HistoryService {
 
   async getAll() {
     return this.prisma
-      .$queryRaw`Select History.id as id, Users.name as pic_name, Users.no_reg, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.section, History.dapartement, History.line, History.reason from History left join Users on History.id_user = Users.id left join Assets on History.id_asset = Assets.id`;
+      .$queryRaw`Select History.id as id, Employee.name as pic_name, Employee.no_reg, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.division, History.section, History.dapartement, History.line, History.reason from History left join Employee on History.id_employee = Employee.id left join Assets on History.id_asset = Assets.id`;
   }
 
   async createHistory(data: Prisma.HistoryCreateInput) {
@@ -19,6 +19,6 @@ export class HistoryService {
 
   async getLashInput(id_asset: number) {
     return this.prisma
-      .$queryRaw`Select History.id as id, Users.name as pic_name, Users.no_reg, Assets.version as asset_version, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.section, History.dapartement, History.line, History.reason from History left join Users on History.id_user = Users.id left join Assets on History.id_asset = Assets.id where History.id_asset= ${id_asset} order by History.id desc limit 1 `;
+      .$queryRaw`Select History.id as id, Employee.name as pic_name, Employee.no_reg, Assets.version as asset_version, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.division, History.section, History.dapartement, History.line, History.reason from History left join Employee on History.id_employee = Employee.id left join Assets on History.id_asset = Assets.id where History.id_asset= ${id_asset} order by History.id desc limit 1 `;
   }
 }

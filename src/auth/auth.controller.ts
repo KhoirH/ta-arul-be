@@ -5,9 +5,12 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -24,10 +27,31 @@ export class AuthController {
       },
     },
   })
-  signIn(@Body() signInDto: Record<string, any>) {
-    if (!signInDto.username || !signInDto.password) {
-      throw new BadRequestException();
+  async signIn(@Body() signInDto: Record<string, any>) {
+    try {
+      if (!signInDto.username || !signInDto.password) {
+        throw new BadRequestException();
+      }
+      const data = await this.authService.signIn(
+        signInDto.username,
+        signInDto.password,
+      );
+      return {
+        data,
+        statusCode: 200,
+        message: 'Success',
+      };
+    } catch (e) {
+      throw e;
     }
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('verify-token')
+  verifyToken() {
+    return {
+      statucCode: 200,
+      success: true,
+    };
   }
 }

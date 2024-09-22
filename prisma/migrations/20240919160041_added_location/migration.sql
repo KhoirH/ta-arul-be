@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Assets` ADD COLUMN `location` VARCHAR(255) NOT NULL DEFAULT '';

@@ -15,15 +15,16 @@ export class AuthService {
     pass: string,
   ): Promise<{ access_token: string }> {
     const user = await this.usersService.findOneByUsername(username);
-
+    if (!user) {
+      throw new UnauthorizedException();
+    }
     const isMatch = await bcrypt.compare(pass, user?.password);
     if (!isMatch) {
       throw new UnauthorizedException();
     }
     const payload = {
       id: user.id,
-      name: user.name,
-      no_reg: user.no_reg,
+      username: user.username,
     };
     return {
       access_token: await this.jwtService.signAsync(payload),

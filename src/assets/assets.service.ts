@@ -6,8 +6,41 @@ import { PrismaService } from 'src/libs/services/prisma.service';
 export class AssetsService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll() {
-    return this.prisma.assets.findMany();
+  async getAllJoinHistory() {
+    return this.prisma
+      .$queryRaw`select * from Assets left join (select History.condition, History.created_at, History.reason, History.id_asset from History order by History.id desc limit 1 ) as Selection_History on Assets.id = Selection_History.id_asset`;
+  }
+
+  async getCountByHistory() {
+    return this.prisma.$queryRaw`
+      select count(
+        case when Selection_History.reason IS NULL  then 'tersedia'
+            when Selection_History.reason in ("on hand")  then 'tersedia' 
+            else Selection_History.reason end
+        ) as count, 
+        (
+        case when Selection_History.reason IS NULL  then 'tersedia'
+            when Selection_History.reason in ("on hand")  then 'tersedia' 
+            else Selection_History.reason end
+        ) as reason
+        from Assets 
+        left join (select History.condition, History.created_at, History.reason, History.id_asset from History order by History.id desc limit 1 ) as Selection_History 
+        on Assets.id = Selection_History.id_asset 
+        group by (
+        case when Selection_History.reason IS NULL  then 'tersedia'
+            when Selection_History.reason in ("on hand")  then 'tersedia' 
+            else Selection_History.reason end
+        )
+    `;
+  }
+
+  async getOneJoinHistory(id: number) {
+    const data = await this.prisma
+      .$queryRaw`select * from Assets left join (select History.condition, History.created_at, History.reason, History.id_asset from History order by History.id desc limit 1 ) as Selection_History on Assets.id = Selection_History.id_asset where Assets.id=${id}`;
+    if (!data) {
+      throw new Error('Error');
+    }
+    return data[0];
   }
 
   async getById(id: number) {
@@ -22,6 +55,18 @@ export class AssetsService {
     return this.prisma.assets.create({
       data,
     });
+  }
+
+  async createAssets(
+    data: Prisma.AssetsCreateInput[],
+  ): Promise<Prisma.BatchPayload> {
+    return this.prisma.assets.createMany({
+      data,
+    });
+  }
+
+  async deleteAsset(id: number) {
+    return this.prisma.assets.delete({ where: { id } });
   }
 
   async updateAsset(

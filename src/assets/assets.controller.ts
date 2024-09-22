@@ -4,12 +4,17 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { HistoryService } from 'src/history/history.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as XLSX from 'xlsx';
 
 @Controller('assets')
 @UseGuards(AuthGuard)
@@ -21,7 +26,56 @@ export class AssetsController {
 
   @Get()
   async getAll() {
-    const data = await this.assetsService.getAll();
+    const data = await this.assetsService.getAllJoinHistory();
+    return {
+      data,
+      message: 'Success',
+      statusCode: 200,
+    };
+  }
+
+  @Post('upload-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file) {
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data_sheet = XLSX.utils.sheet_to_json(worksheet);
+
+    const data_database = data_sheet.map((d) => ({
+      asset_number: d['Nomor Asset'],
+      device_name: d['Jenis Asset'],
+      serial_number: d?.['Nomor Serial'] ? `${d['Nomor Serial']}` : '-',
+      asset_year: `${d['Tahun Pembelian']}`,
+      location: d['Lokasi Kota'],
+    }));
+
+    const post = await this.assetsService.createAssets(data_database);
+    return {
+      data: post,
+      message: 'Success',
+      statusCode: 200,
+    };
+    // file is the uploaded file
+  }
+
+  @Get('count-by-reason')
+  async getCountByReason() {
+    const dataQuery: any = await this.assetsService.getCountByHistory();
+    const data: any = {};
+    // console.log(dataQuery)
+    dataQuery.forEach((d) => {
+      data[d.reason] = Number(d.count);
+    });
+    return {
+      data,
+      message: 'Success',
+      statusCode: 200,
+    };
+  }
+
+  @Get(':id')
+  async getFirst(@Param('id', ParseIntPipe) id: number) {
+    const data = await this.assetsService.getOneJoinHistory(id);
     return {
       data,
       message: 'Success',
@@ -90,21 +144,21 @@ export class AssetsController {
     @Body()
     body: {
       id_asset: number;
-      id_user: number;
+      id_employee: number;
       status_unit: string;
       section: string;
       dapartement: string;
       line: string;
+      division: string;
     },
   ) {
     try {
       const assetStatus = await this.assetsService.getById(body.id_asset);
-
       if (!assetStatus) {
         throw new BadRequestException('Asset tidak ditemukan');
       }
 
-      if (!assetStatus.avability) {
+      if (!assetStatus?.avability) {
         throw new BadRequestException(`Asset tidak tersedia !`);
       }
 
@@ -118,7 +172,8 @@ export class AssetsController {
           condition: true,
           dapartement: body.dapartement,
           id_asset: body.id_asset,
-          id_user: body.id_user,
+          id_employee: body.id_employee,
+          division: body.division,
           line: body.line,
           reason: 'dipinjam',
           section: body.section,
@@ -149,12 +204,13 @@ export class AssetsController {
     @Body()
     body: {
       id_asset: number;
-      id_user: number;
+      id_employee: number;
       condition: string;
       reason: string;
       status_unit: string;
       section: string;
       dapartement: string;
+      division: string;
       line: string;
     },
   ) {
@@ -182,9 +238,10 @@ export class AssetsController {
         condition,
         dapartement: body.dapartement,
         id_asset: body.id_asset,
-        id_user: body.id_user,
+        id_employee: body.id_employee,
         line: body.line,
-        reason: body.reason,
+        division: body.division,
+        reason: body?.reason ?? 'on hand',
         section: body.section,
         status_unit: body.status_unit,
       });
@@ -210,7 +267,6 @@ export class AssetsController {
     @Body()
     body: {
       id_asset: number;
-      id_user: number;
       condition: string;
       reason: string;
     },
@@ -241,9 +297,10 @@ export class AssetsController {
         condition,
         dapartement: historyStatus[0].dapartement,
         id_asset: body.id_asset,
-        id_user: body.id_user,
+        division: historyStatus[0].division,
+        id_employee: historyStatus[0].id_employee,
         line: historyStatus[0].line,
-        reason: historyStatus[0].reason,
+        reason: body.reason,
         section: historyStatus[0].section,
         status_unit: historyStatus[0].status_unit,
       });
@@ -261,6 +318,20 @@ export class AssetsController {
         throw new BadRequestException(e?.meta?.cause);
       }
       throw e;
+    }
+  }
+
+  @Post('delete/:id')
+  async deleteAsset(@Param('id') id: string) {
+    try {
+      const post = await this.assetsService.deleteAsset(Number(id));
+      return {
+        data: post,
+        message: 'Success',
+        statusCode: 200,
+      };
+    } catch (e) {
+      throw new BadRequestException(e?.meta?.cause);
     }
   }
 }

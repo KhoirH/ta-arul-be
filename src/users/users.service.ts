@@ -12,11 +12,4 @@ export class UsersService {
       },
     });
   }
-
-  async searchUsers(name?: string, no_reg?: string) {
-    const nameConvert = name ? `%${name}%` : '0';
-    const noRegConvert = no_reg ? `%${no_reg}%` : '0';
-    return this.prisma
-      .$queryRaw`select no_reg, name from Users where name LIKE ${nameConvert} OR no_reg LIKE ${noRegConvert}`;
-  }
 }
