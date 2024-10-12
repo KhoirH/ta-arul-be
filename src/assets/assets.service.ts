@@ -7,8 +7,24 @@ export class AssetsService {
   constructor(private prisma: PrismaService) {}
 
   async getAllJoinHistory() {
-    return this.prisma
-      .$queryRaw`select * from Assets left join (select History.condition, History.created_at, History.reason, History.id_asset from History order by History.id desc limit 1 ) as Selection_History on Assets.id = Selection_History.id_asset`;
+    return this.prisma.$queryRaw`
+        select 
+          Selection_History.condition,
+          Selection_History.created_at,
+          (case when Selection_History.reason IS NULL  then 'tersedia'
+            when Selection_History.reason in ("on hand")  then 'tersedia' 
+            else Selection_History.reason end
+          ) as reason,
+          Assets.id,
+          Assets.device_name,
+          Assets.location,
+          Assets.serial_number,
+          Assets.asset_year
+        from Assets 
+        left join 
+          (select History.condition, History.created_at, History.reason, History.id_asset from History order by History.id desc limit 1 ) as Selection_History 
+          on Assets.id = Selection_History.id_asset
+      `;
   }
 
   async getCountByHistory() {

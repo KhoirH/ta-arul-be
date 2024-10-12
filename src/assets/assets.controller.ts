@@ -89,6 +89,7 @@ export class AssetsController {
     body: {
       asset_number: number;
       device_name: string;
+      location: string;
       serial_number: string;
       asset_year: string;
     },
@@ -100,6 +101,7 @@ export class AssetsController {
         serial_number: body.serial_number,
         asset_year: body.asset_year,
         avability: true,
+        location: body.location,
       });
       return {
         data: post,
@@ -118,6 +120,7 @@ export class AssetsController {
       asset_number: number;
       device_name: string;
       serial_number: string;
+      location: string;
       asset_year: string;
     },
     @Param('id') id: string,
@@ -128,6 +131,7 @@ export class AssetsController {
         device_name: body.device_name,
         serial_number: body.serial_number,
         asset_year: body.asset_year,
+        location: body.location,
       });
       return {
         data: post,

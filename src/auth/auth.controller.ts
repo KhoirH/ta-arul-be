@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
@@ -18,7 +18,6 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  @ApiOperation({ summary: 'Create cat' })
   @ApiBody({
     schema: {
       default: {
