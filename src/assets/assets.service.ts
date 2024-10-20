@@ -19,6 +19,7 @@ export class AssetsService {
           Assets.device_name,
           Assets.location,
           Assets.serial_number,
+          Assets.avability,
           Assets.asset_year
         from Assets 
         left join 

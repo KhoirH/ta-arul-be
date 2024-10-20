@@ -220,7 +220,6 @@ export class AssetsController {
   ) {
     try {
       const assetStatus = await this.assetsService.getById(body.id_asset);
-
       if (!assetStatus) {
         throw new BadRequestException('Asset tidak ditemukan');
       }
