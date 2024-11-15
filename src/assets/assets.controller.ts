@@ -60,6 +60,7 @@ export class AssetsController {
         d.serial_number,
         d.asset_year,
         d.location,
+        d.reason,
       ]),
     ]);
     const wb = XLSX.utils.book_new();
