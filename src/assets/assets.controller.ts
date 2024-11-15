@@ -3,9 +3,11 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Post,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -32,6 +34,39 @@ export class AssetsController {
       message: 'Success',
       statusCode: 200,
     };
+  }
+
+  @Get('download')
+  @Header('Content-Disposition', 'attachment; filename="asset_data.xlsx"')
+  @Header('X-Filename', 'asset_data.xlsx')
+  @Header('Access-Control-Expose-Headers', 'X-Filename')
+  async getAllXlsx() {
+    const data: any = await this.assetsService.getAllJoinHistory();
+
+    const ws = XLSX.utils.aoa_to_sheet([
+      [
+        'Id Asset',
+        'Nama Device',
+        'Serial Number',
+        'Tahun Asset',
+        'Lokasi',
+        'Status',
+      ],
+      ...(data ?? []).map((d) => [
+        d.id,
+        d.device_name,
+        d.asset_number,
+        d.serial_number,
+        d.asset_year,
+        d.location,
+      ]),
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    /* generate buffer */
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    /* Return a streamable file */
+    return new StreamableFile(buf);
   }
 
   @Post('upload-data')
