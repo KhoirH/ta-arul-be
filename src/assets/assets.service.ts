@@ -19,6 +19,8 @@ export class AssetsService {
           Assets.device_name,
           Assets.location,
           Assets.serial_number,
+          Assets.asset_number,
+          Assets.location,
           Assets.avability,
           Assets.asset_year
         from Assets 
