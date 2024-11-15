@@ -47,6 +47,7 @@ export class AssetsController {
       [
         'Id Asset',
         'Nama Device',
+        'Asset Number',
         'Serial Number',
         'Tahun Asset',
         'Lokasi',
