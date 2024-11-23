@@ -8,7 +8,7 @@ export class HistoryService {
 
   async getAll() {
     return this.prisma
-      .$queryRaw`Select History.id as id, Employee.name as pic_name, Employee.no_reg, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.division, History.section, History.dapartement, History.line, History.reason from History left join Employee on History.id_employee = Employee.id left join Assets on History.id_asset = Assets.id`;
+      .$queryRaw`Select History.id as id, Employee.name as pic_name, Employee.no_reg, Assets.device_name, Assets.asset_number, Assets.serial_number, Assets.asset_year, Assets.avability, History.condition, Assets.avability, History.status_unit, History.division, History.section, History.dapartement, History.line, History.reason, History.created_at from History left join Employee on History.id_employee = Employee.id left join Assets on History.id_asset = Assets.id`;
   }
 
   async createHistory(data: Prisma.HistoryCreateInput) {
@@ -36,7 +36,8 @@ export class HistoryService {
         History.dapartement,
         History.line,
         History.id_employee,
-        History.reason
+        History.reason,
+        Convert(History.created_at, Varchar(11))
         from History left join Employee on History.id_employee = Employee.id left join Assets on History.id_asset = Assets.id where History.id_asset= ${id_asset} order by History.id desc limit 1 `;
   }
 }

@@ -45,6 +45,7 @@ export class HistoryController {
         'Departement',
         'Line',
         'Condition',
+        'Tanggal Transaksi',
       ],
       ...(data ?? []).map((d) => [
         d.device_name,
@@ -60,6 +61,7 @@ export class HistoryController {
         d.dapartement,
         d.line,
         d.condition ? 'Baik' : 'Rusak',
+        d.created_at,
       ]),
     ]);
     const wb = XLSX.utils.book_new();
